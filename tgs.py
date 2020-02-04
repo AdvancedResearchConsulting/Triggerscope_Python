@@ -1,7 +1,7 @@
 import serial
 import time
 
-tgsCom    = "/dev/cu.usbmodem14101"  ##### MODIFY THIS LINE FOR YOUR SERIAL PORT NAME OR NUMBER
+tgsCom    = "/dev/cu.usbmodem14201"  ##### MODIFY THIS LINE FOR YOUR SERIAL PORT NAME OR NUMBER
 tgS = serial.Serial()
 tgS.port = tgsCom
 tgS.baudrate = 115200
@@ -44,6 +44,8 @@ def writetgs(tgin):
     Raises:
         none.
     '''
+    scomp = '!'+tgin
+    print(scomp)
     tgS.flushInput() #flush input buffer, discarding all its contents
     tgS.flushOutput()#flush output buffer, aborting current output 
     tgS.write(tgin.encode()) #send an ack to tgs to make sure it's up
@@ -80,6 +82,11 @@ def progtest():
         time.sleep(0.5)
 
 #progtest()
+print(writetgs("TTL1,1\n"))
+dv = 32236
+out = "DAC1,"+str(dv)+"\n"
+print(out)
 
-print(writetgs("STAT?\n"))
+
+
 

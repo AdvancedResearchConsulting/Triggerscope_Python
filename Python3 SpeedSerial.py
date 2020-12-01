@@ -1,9 +1,9 @@
 import serial
 import time
 
-tgsCom = "/dev/cu.usbmodem14101"
+tgCom = "/dev/tty.usbmodem81494301"
 tgS = serial.Serial()
-tgS.port = tgsCom
+tgS.port = tgCom
 tgS.baudrate = 115200
 tgS.bytesize = serial.EIGHTBITS  # number of bits per bytes
 tgS.parity = serial.PARITY_NONE  # set parity check: no parity
@@ -30,10 +30,10 @@ if tgS.isOpen():
         time.sleep(0.2)  # give the serial port sometime to receive the data
         print("Rx: " + tgS.readline().decode())
     except Exception as e1:
-        print("triggerscope serial communication error...: " + str(e1))
+        print(" serial communication error...: " + str(e1))
 
 else:
-    print("cannot open triggerscope port ")
+    print("cannot open tg cell  port ")
 
 
 def writetgs(tgin):
@@ -53,6 +53,19 @@ def writetgs(tgin):
     bufa = tgS.readline()
     return bufa
 
+def readStat():
+
+    tgS.flushInput()  # flush input buffer, discarding all its contents
+    tgS.flushOutput()  # flush output buffer, aborting current output
+    tgS.write("STAT?\n".encode())  # send command
+    time.sleep(0.02)  # give the serial port sometime to receive the data 50ms works well...
+    for n in range(100):
+        time.sleep(0.2)  # give the serial port sometime to receive the data 50ms works well...
+        bufa = ""
+        bufa = tgS.readline()
+        print(bufa);
+        if(len(bufa) < 5):
+            break
 
 def speedTestA():
 
@@ -75,9 +88,18 @@ def speedTestA():
     print( writetgs("PROG_TTL,3,2,0\n") )
     print( writetgs("PROG_TTL,3,3,1\n") )
     print( writetgs("PROG_TTL,3,4,0\n") )
+    #readStat()
+    input(" Press Enter to ARM...")
 
     print( writetgs("ARM\n") )
 
+    for n in range(100):
+        time.sleep(0.2)  # give the serial port sometime to receive the data 50ms works well...
+        bufa = ""
+        bufa = tgS.readline()
+        print(bufa);
+        if (len(bufa) < 5):
+            break
 
 def speedTestB():
 
@@ -88,7 +110,7 @@ def speedTestB():
 
     print( writetgs("TIMECYCLES,3\n") )
 
-    print( writetgs("PROG_FOCUS,32832,3276,4,1,0\n") )
+    print( writetgs("PROG_FOCUS,32832,3276,4,0,0\n") )
 
     print( writetgs("PROG_TTL,1,1,1\n") )
     print( writetgs("PROG_TTL,1,2,0\n") )
@@ -104,6 +126,62 @@ def speedTestB():
 
     print( writetgs("ARM\n") )
 
+
+    for n in range(100):
+        time.sleep(0.2)  # give the serial port sometime to receive the data 50ms works well...
+        bufa = ""
+        bufa = tgS.readline()
+        print(bufa);
+        if (len(bufa) < 5):
+            break
+
+def speedTestC():
+
+   # for x in range (5):
+   #     time.sleep(1)  # for the arduino reset
+   #     print(x)
+    start = time.time()
+
+    print( writetgs("TIMECYCLES,3\n") )
+
+    print( writetgs("PROG_FOCUS,32832,3276,4,0,1\n") )
+
+    print( writetgs("PROG_TTL,1,1,1\n") )
+    print( writetgs("PROG_TTL,1,2,0\n") )
+
+    print( writetgs("PROG_TTL,2,1,0\n") )
+    print( writetgs("PROG_TTL,2,2,1\n") )
+    print( writetgs("PROG_TTL,2,3,0\n") )
+
+    print( writetgs("PROG_TTL,3,1,0\n") )
+    print( writetgs("PROG_TTL,3,2,0\n") )
+    print( writetgs("PROG_TTL,3,3,1\n") )
+    print( writetgs("PROG_TTL,3,4,0\n") )
+
+    print( writetgs("ARM\n") )
+    for n in range(100):
+        time.sleep(0.2)  # give the serial port sometime to receive the data 50ms works well...
+        bufa = ""
+        bufa = tgS.readline()
+        print(bufa);
+        if (len(bufa) < 5):
+            break
+
+def PWMGen():
+    print(writetgs("TIMECYCLES,100\n")) #cycle this operation 100 times on camera input trigger
+    print(writetgs("PROG_TTL,1,1,1\n"))
+    print(writetgs("PROG_TTL,1,2,0\n"))
+    print( writetgs("ARM\n") ) #Arm sequence
+    for n in range(100): #read reply from triggerscope
+        time.sleep(0.2)  # give the serial port sometime to receive the data 50ms works well...
+        bufa = ""
+        bufa = tgS.readline()
+        print(bufa);
+        if (len(bufa) < 5):
+            break
+
+
+
 def cyclettl():
     for i in range(30):
         print(writetgs("TTL1,1\n"))
@@ -117,16 +195,24 @@ def cycledac():
         time.sleep(0.05)
 
 
+#input(" Check for TTL 1 on and off @ 10Hz - Arm Oscilloscope Press Enter ...")
+#cyclettl()
 
-input(" Check for TTL 1 on and off @ 10Hz - Arm Oscilloscope Press Enter ...")
-cyclettl()
+#input(" Check for DAC 1 ramp @ 10Hz - Arm Oscilloscope Press Enter ...")
+#cycledac()
 
-input(" Check for DAC 1 ramp @ 10Hz - Arm Oscilloscope Press Enter ...")
-cycledac()
-
+#input(" Sweep over Channel First - Arm Oscilloscope Press Enter ...")
+#speedTestA()
 
 input(" Sweep over Channel First - Arm Oscilloscope Press Enter ...")
 speedTestA()
 
-input(" Sweep over Channel First - Arm Oscilloscope Press Enter ...")
-speedTestB()
+#input(" Sweep over Channel First - Arm Oscilloscope Press Enter ...")
+#speedTestB()
+
+#input(" Sweep over Channel First - Arm Oscilloscope Press Enter ...")
+
+#speedTestC()
+
+#readStat()
+
